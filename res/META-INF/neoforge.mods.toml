@@ -1,0 +1,36 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+issueTrackerURL = ""
+
+[[mods]]
+modId = "reachin"
+version = "0.1.0"
+displayName = "Shulker Tooltips: Reach-In"
+authors = "nate"
+description = '''
+Hover a shulker box in any inventory and its contents open as a live grid
+beside the screen. Click, right-click, shift-click and drag straight into and
+out of it, without ever placing the box down.
+
+The grid cells are real menu slots, so every vanilla click behaviour works on
+them unchanged, and the server validates every move. Required on both the
+client and the server.
+'''
+
+[[mixins]]
+config = "reachin.mixins.json"
+
+[[dependencies.reachin]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.reachin]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "BOTH"
