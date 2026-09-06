@@ -12,7 +12,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -48,7 +50,22 @@ public final class GridRenderer {
     private static final int BEVEL_DARK = 0xFF555555;
     private static final int CELL_FACE = 0xFF8B8B8B;
     private static final int CELL_DARK = 0xFF373737;
-    private static final int LABEL = 0x404040;
+    private static final int LABEL_DARK = 0x404040;
+    private static final int LABEL_LIGHT = 0xE0E0E0;
+
+    /**
+     * An undyed shulker box has no DyeColor but its texture is purple, so it is
+     * tinted to match rather than left grey. The title says which box it is, so
+     * looking like a purple one costs nothing.
+     */
+    private static final int UNDYED = 0x8A4E9E;
+
+    // Kept low on purpose. The panel should read as a vanilla GUI that happens to
+    // carry the box's colour, not as a slab of dye - and the bevels have to stay
+    // far enough apart in luminance to still look like bevels.
+    private static final float TINT_FACE = 0.30F;
+    private static final float TINT_BEVEL = 0.18F;
+    private static final float TINT_CELL = 0.25F;
 
     private GridRenderer() {
     }
@@ -136,26 +153,33 @@ public final class GridRenderer {
         graphics.pose().pushPose();
         graphics.pose().translate(0.0F, 0.0F, 200.0F);
 
+        ItemStack hostStack = binding.view.host().getItem();
+        int dye = dyeOf(hostStack);
+        int face = tint(FACE, dye, TINT_FACE);
+        int bevelLight = tint(BEVEL_LIGHT, dye, TINT_BEVEL);
+        int bevelDark = tint(BEVEL_DARK, dye, TINT_FACE);
+        int cellFace = tint(CELL_FACE, dye, TINT_CELL);
+        int cellDark = tint(CELL_DARK, dye, TINT_CELL);
+
         graphics.fill(x, y, x + PANEL_W, y + PANEL_H, BORDER);
-        graphics.fill(x + 1, y + 1, x + PANEL_W - 1, y + PANEL_H - 1, FACE);
-        graphics.fill(x + 1, y + 1, x + PANEL_W - 2, y + 2, BEVEL_LIGHT);
-        graphics.fill(x + 1, y + 1, x + 2, y + PANEL_H - 2, BEVEL_LIGHT);
-        graphics.fill(x + 2, y + PANEL_H - 2, x + PANEL_W - 1, y + PANEL_H - 1, BEVEL_DARK);
-        graphics.fill(x + PANEL_W - 2, y + 2, x + PANEL_W - 1, y + PANEL_H - 1, BEVEL_DARK);
+        graphics.fill(x + 1, y + 1, x + PANEL_W - 1, y + PANEL_H - 1, face);
+        graphics.fill(x + 1, y + 1, x + PANEL_W - 2, y + 2, bevelLight);
+        graphics.fill(x + 1, y + 1, x + 2, y + PANEL_H - 2, bevelLight);
+        graphics.fill(x + 2, y + PANEL_H - 2, x + PANEL_W - 1, y + PANEL_H - 1, bevelDark);
+        graphics.fill(x + PANEL_W - 2, y + 2, x + PANEL_W - 1, y + PANEL_H - 1, bevelDark);
 
         Font font = Minecraft.getInstance().font;
-        String name = font.plainSubstrByWidth(binding.view.host().getItem().getHoverName().getString(),
-                PANEL_W - PAD * 2);
-        graphics.drawString(font, name, x + PAD, y + 5, LABEL, false);
+        String name = font.plainSubstrByWidth(hostStack.getHoverName().getString(), PANEL_W - PAD * 2);
+        graphics.drawString(font, name, x + PAD, y + 5, labelFor(face), false);
 
         for (int i = 0; i < ReachIn.SLOTS; i++) {
             int cx = x + PAD + (i % COLS) * CELL;
             int cy = y + HEADER + (i / COLS) * CELL;
-            graphics.fill(cx, cy, cx + CELL, cy + CELL, CELL_FACE);
-            graphics.fill(cx, cy, cx + CELL - 1, cy + 1, CELL_DARK);
-            graphics.fill(cx, cy, cx + 1, cy + CELL - 1, CELL_DARK);
-            graphics.fill(cx + 1, cy + CELL - 1, cx + CELL, cy + CELL, BEVEL_LIGHT);
-            graphics.fill(cx + CELL - 1, cy + 1, cx + CELL, cy + CELL, BEVEL_LIGHT);
+            graphics.fill(cx, cy, cx + CELL, cy + CELL, cellFace);
+            graphics.fill(cx, cy, cx + CELL - 1, cy + 1, cellDark);
+            graphics.fill(cx, cy, cx + 1, cy + CELL - 1, cellDark);
+            graphics.fill(cx + 1, cy + CELL - 1, cx + CELL, cy + CELL, bevelLight);
+            graphics.fill(cx + CELL - 1, cy + 1, cx + CELL, cy + CELL, bevelLight);
         }
 
         // Commit the panel before the items go in, for the same batching reason.
@@ -177,6 +201,29 @@ public final class GridRenderer {
 
         graphics.flush();
         graphics.pose().popPose();
+    }
+
+    /** The dye colour of a shulker box item, or the undyed box's own purple. */
+    private static int dyeOf(ItemStack stack) {
+        DyeColor dye = ShulkerBoxBlock.getColorFromItem(stack.getItem());
+        return dye == null ? UNDYED : dye.getTextureDiffuseColor() & 0xFFFFFF;
+    }
+
+    /** Blends a vanilla GUI colour toward the dye, keeping the alpha it came with. */
+    private static int tint(int argb, int dye, float amount) {
+        int alpha = argb & 0xFF000000;
+        int r = Math.round((((argb >> 16) & 0xFF) * (1 - amount)) + (((dye >> 16) & 0xFF) * amount));
+        int g = Math.round((((argb >> 8) & 0xFF) * (1 - amount)) + (((dye >> 8) & 0xFF) * amount));
+        int b = Math.round(((argb & 0xFF) * (1 - amount)) + ((dye & 0xFF) * amount));
+        return alpha | (r << 16) | (g << 8) | b;
+    }
+
+    /** Black text on a light panel, near-white on a dark one. */
+    private static int labelFor(int face) {
+        int r = (face >> 16) & 0xFF;
+        int g = (face >> 8) & 0xFF;
+        int b = face & 0xFF;
+        return (0.299 * r + 0.587 * g + 0.114 * b) > 140.0 ? LABEL_DARK : LABEL_LIGHT;
     }
 
     /** True while the cursor is in the box spanning the shulker's slot and the panel. */

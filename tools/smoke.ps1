@@ -194,5 +194,25 @@ $p = ChestCell 0
 Shift-Click $p.X $p.Y
 Shot "12-chest-grid-out"
 
+Write-Output "13. panel tint per shulker colour"
+# Two escapes: the first is eaten by the grid, the second closes the chest screen.
+# Chat will not open while a screen is up, and the command would leak as keybinds.
+Press-Key 0x1B 80
+Start-Sleep -Milliseconds 500
+Press-Key 0x1B 80
+Start-Sleep -Milliseconds 900
+Send-Command "/clear"
+$colours = @("shulker_box", "red_shulker_box", "lime_shulker_box", "light_blue_shulker_box",
+             "black_shulker_box", "white_shulker_box", "yellow_shulker_box", "magenta_shulker_box")
+foreach ($c in $colours) { Send-Command "/give @s $c" }
+Start-Sleep -Milliseconds 800
+Press-Key 0x45 80
+Start-Sleep -Milliseconds 900
+for ($i = 0; $i -lt $colours.Count; $i++) {
+    $p = Hotbar $i
+    Move-McMouse $p.X $p.Y
+    Shot ("13-tint-{0}" -f $colours[$i])
+}
+
 Write-Output "done, screenshots in $Out"
 

@@ -16,6 +16,9 @@ The grid is sticky. It stays put while you move toward it, and it never closes
 while you're carrying an item. Escape closes the grid without closing the
 screen.
 
+The panel takes the colour of the box you're looking into, so a wall of shulkers
+stays legible at a glance.
+
 Works in your inventory, chests, barrels, ender chests, and every other
 container screen.
 

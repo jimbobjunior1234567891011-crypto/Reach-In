@@ -109,6 +109,17 @@ The grid is drawn from `fill` calls in the vanilla GUI palette — panel face
 inset. No texture, no new asset, and it sits correctly in both the default
 look and most resource packs' colour range.
 
+Each colour is then blended toward the box's dye — 30% on the faces, 18% on the
+light bevels. Low on purpose: enough that a wall of shulkers is legible at a
+glance, not so much that the panel stops reading as a Minecraft GUI. The bevels
+have to keep their luminance spacing or they stop looking like bevels, which is
+why the highlight is tinted less than the face.
+
+An undyed box has no `DyeColor` but its texture is purple, so it is tinted to
+match rather than left grey; the title names the box, so looking like a purple
+one costs nothing. The title switches between dark and near-white text based on
+the tinted face's luminance, so a black box's panel stays readable.
+
 The panel anchors to the right edge of the GUI, flipping left when there is no
 room, and centring over the GUI when neither side fits. At GUI scale 3 on a
 720p window nothing fits, so the overlay case is normal rather than an edge
