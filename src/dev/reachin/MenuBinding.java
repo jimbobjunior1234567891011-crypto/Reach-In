@@ -17,6 +17,10 @@ public class MenuBinding {
      */
     public boolean autoGuard = false;
 
+    /** Panel position in screen space, worked out during the background pass. Client only. */
+    public int panelX;
+    public int panelY;
+
     public boolean installed() {
         return base >= 0;
     }

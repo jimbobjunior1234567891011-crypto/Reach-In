@@ -78,7 +78,11 @@ with authoritative contents, so a wrong guess corrects itself immediately.
 
 ### Shift-click rules
 
-- From a grid cell -> into the player inventory.
+- From a grid cell -> into the player's main inventory and hotbar. Not simply
+  "everything before the grid": in the player's own menu that range also covers
+  the crafting slots, the armour slots and the offhand, and since the move runs
+  in reverse it reaches the offhand first. Taking an item out of a shulker put
+  it in your offhand until this was narrowed to container indices below 36.
 - From a player inventory slot -> into the shulker.
 - From a container slot (chest, barrel) -> unchanged vanilla behaviour.
 - The shulker box itself -> unchanged vanilla behaviour.
@@ -105,12 +109,38 @@ The grid is drawn from `fill` calls in the vanilla GUI palette — panel face
 inset. No texture, no new asset, and it sits correctly in both the default
 look and most resource packs' colour range.
 
-The panel anchors to the right edge of the GUI, flipping left when there is
-no room and clamping to the screen. Anchoring to the GUI rather than the slot
-keeps it from ever covering the parent screen's own slots.
+The panel anchors to the right edge of the GUI, flipping left when there is no
+room, and centring over the GUI when neither side fits. At GUI scale 3 on a
+720p window nothing fits, so the overlay case is normal rather than an edge
+case, and the panel has to draw above the parent screen rather than under it.
 
-Drawn immediately after the screen background and before vanilla's slot loop,
-so the real cells and their items render on top of it.
+Two NeoForge events, not mixins into `AbstractContainerScreen.render` —
+NeoForge patches that method so it never calls `super.render`, leaving nothing
+stable to inject at.
+
+- `ContainerScreenEvent.Render.Background` runs before the slot loop. Binding
+  and cell placement happen there, so vanilla hit-tests the cells where the
+  panel actually is, in the same frame.
+- `ContainerScreenEvent.Render.Foreground` runs after the parent screen's own
+  slots and labels. All drawing happens there, which is why the cells' vanilla
+  rendering is suppressed and their items are drawn by hand.
+
+Being later in the frame is not enough to be in front. Items and the player
+preview go through a deferred buffer source that batches by render type rather
+than draw order, and the preview is depth-tested. So the panel commits that
+queue with `flush()` and draws at Z 200 — above the screen's own items, below
+vanilla's tooltip layer at 400.
+
+## Hit-testing
+
+Vanilla's `findSlot` returns the first slot in menu order whose box contains
+the cursor. The cells are appended last, so wherever the panel overlaps the
+parent GUI a parent slot always wins — clicking a cell that sits over the
+armour column moves armour instead.
+
+So `findSlot` checks the cells first. Points on the panel that are not on a
+cell resolve to nothing, so the panel is never a window into what it covers,
+and the same rule keeps tooltips from leaking through it.
 
 ## Scope
 
@@ -123,20 +153,20 @@ open, nesting, search, sorting.
 
 ## Testing
 
-The build is javac against a NeoForge install, with no Gradle and therefore
-no Minecraft test harness. The gate is a compile-clean build plus a hand
-smoke test in game:
+The build is javac against a NeoForge install, with no Gradle and therefore no
+Minecraft test harness. So the test is the game itself, driven from the
+terminal rather than by hand: `tools/run-client.ps1` launches an isolated
+client with only this mod loaded, `tools/mcctl.ps1` sends real input and
+captures the window, and `tools/smoke.ps1` sequences a twelve-step run with a
+screenshot per step.
 
-1. Hover a shulker in your inventory — grid appears with correct contents.
-2. Left-click an item out, left-click it back. Close and reopen. It persisted.
-3. Right-click to split a stack inside the grid.
-4. Shift-click a grid item — lands in the player inventory.
-5. Shift-click an inventory item — lands in the shulker.
-6. Open a chest. Shift-click a chest item — goes to the inventory, never
-   into the shulker.
-7. Escape closes the grid, not the screen.
-8. Place the box down and confirm the contents match what the grid showed.
-9. On the server with a second player, confirm no dupe when both interact.
+The step that actually proves it is `/data get entity @s SelectedItem`, which
+reads the shulker back through vanilla's own command — the contents have to be
+on the item's `CONTAINER` component, not just something the panel is drawing.
+
+Results in `docs/smoke/`. Still uncovered: multiplayer with a second player on
+the same shulker, and the vanilla click semantics that come along for free
+(drag distribution, double-click collect, hotbar number swap).
 
 ## Build
 

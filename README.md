@@ -48,7 +48,7 @@ means "don't render, don't hit-test".
 
 | From | Goes to |
 |------|---------|
-| A grid cell | Your inventory |
+| A grid cell | Your main inventory and hotbar |
 | A player inventory slot | The shulker |
 | A chest or barrel slot | Vanilla behaviour, unchanged |
 | The shulker box itself | Vanilla behaviour, unchanged |
@@ -71,6 +71,14 @@ cover the panel. That also hides
 which renders through the same pipeline, so the two never stack. Keep it
 installed or don't — either works.
 
+## Layout
+
+The panel sits to the right of the GUI, flipping to the left when there's no room
+and centring over the GUI when neither side fits. At GUI scale 3 on a 720p window
+nothing fits beside a 176-wide GUI, so it overlays — still fully usable, since
+hit-testing prefers the grid, but scale 2 or a larger window is where it looks
+right.
+
 ## Building
 
 ```powershell
@@ -84,9 +92,28 @@ install already carries every jar needed to compile against, so `javac` + `jar`
 is the whole toolchain and no refmap is generated. Override `-Install`,
 `-NeoForgeVersion`, `-McLibVersion` or `-Jdk` if your paths differ.
 
+## Testing
+
+There's no Gradle here and so no Minecraft test harness. The test is the game
+itself, driven from the terminal:
+
+```powershell
+.\tools\smoke.ps1
+```
+
+That launches an isolated client with only this mod loaded, loads a test world,
+and drives twelve steps with real mouse and keyboard input, saving a screenshot
+of each. The one that actually proves anything is
+`/data get entity @s SelectedItem` — it reads the shulker back through vanilla's
+own command, so the contents have to really be on the item's `CONTAINER`
+component rather than just something the panel is drawing.
+
+Add `-Trace` to log every slot click with the binding state.
+
 ## Design
 
 [`docs/specs/2026-09-05-reach-in-design.md`](docs/specs/2026-09-05-reach-in-design.md)
+· [smoke results](docs/smoke/2026-09-05-reachin-v0.1-smoke.md)
 
 ## Licence
 

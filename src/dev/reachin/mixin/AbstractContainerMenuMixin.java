@@ -81,6 +81,12 @@ public abstract class AbstractContainerMenuMixin implements ReachInMenu {
     @Inject(method = "clicked", at = @At("HEAD"), cancellable = true)
     private void reachin$clicked(int slotId, int button, ClickType clickType, Player player, CallbackInfo ci) {
         MenuBinding binding = reachin$binding();
+        if (ReachIn.DEBUG) {
+            ReachIn.debug("clicked side=" + (player.level().isClientSide ? "C" : "S")
+                    + " slotId=" + slotId + " type=" + clickType
+                    + " base=" + binding.base + " host=" + binding.hostIndex
+                    + " valid=" + binding.view.valid() + " guard=" + binding.autoGuard);
+        }
         if (clickType != ClickType.QUICK_MOVE || !binding.installed() || !binding.view.valid()) {
             return;
         }
@@ -113,13 +119,41 @@ public abstract class AbstractContainerMenuMixin implements ReachInMenu {
         reachin$binding().autoGuard = false;
     }
 
-    /** Grid cell to the parent menu, hotbar end first, the way vanilla takes items out. */
+    /**
+     * The player's main inventory and hotbar, as a menu index range.
+     *
+     * Not simply everything before the grid: in the player's own menu that range also
+     * covers the crafting grid, the armour slots and - as the very last slot, which a
+     * reversed move reaches first - the offhand. Taking an item out of a shulker would
+     * put it in your offhand.
+     *
+     * Container slot indices below 36 are exactly the main inventory and hotbar; 36-39
+     * are armour and 40 is the offhand.
+     */
+    @Unique
+    private int[] reachin$playerRange(MenuBinding binding) {
+        int start = -1;
+        int end = -1;
+        for (int i = 0; i < binding.base; i++) {
+            Slot slot = this.slots.get(i);
+            if (slot.container instanceof Inventory && slot.getContainerSlot() < 36) {
+                if (start < 0) {
+                    start = i;
+                }
+                end = i + 1;
+            }
+        }
+        return start < 0 ? new int[]{0, binding.base} : new int[]{start, end};
+    }
+
+    /** Grid cell to the player, hotbar end first, the way vanilla takes items out. */
     @Unique
     private void reachin$quickOut(Slot source, MenuBinding binding, Player player) {
         ItemStack stack = source.getItem();
         ItemStack before = stack.copy();
+        int[] range = reachin$playerRange(binding);
         binding.autoGuard = true;
-        boolean moved = this.moveItemStackTo(stack, 0, binding.base, true);
+        boolean moved = this.moveItemStackTo(stack, range[0], range[1], true);
         binding.autoGuard = false;
         if (!moved) {
             return;

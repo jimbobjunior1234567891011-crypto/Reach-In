@@ -28,7 +28,12 @@ public class ShulkerSlot extends Slot {
 
     @Override
     public boolean mayPlace(ItemStack stack) {
-        return this.view.valid() && !this.binding.autoGuard && !ReachIn.isShulker(stack);
+        boolean allowed = this.view.valid() && !this.binding.autoGuard && !ReachIn.isShulker(stack);
+        if (ReachIn.DEBUG && !allowed) {
+            ReachIn.debug("mayPlace refused: valid=" + this.view.valid()
+                    + " guard=" + this.binding.autoGuard + " stack=" + stack);
+        }
+        return allowed;
     }
 
     @Override
