@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reach-In — reach into shulker boxes without placing them</title>
+<meta name="description" content="A Minecraft 1.21.1 NeoForge mod. Hover a shulker box and its contents open as a live, clickable grid beside any inventory.">
+<link rel="icon" href="brand/avatar.png">
+<meta property="og:title" content="Reach-In">
+<meta property="og:description" content="Hover a shulker box. Reach into it. Never place it down again.">
+<meta property="og:image" content="brand/social-preview.png">
+<meta property="og:type" content="website">
+<style>
+  :root {
+    --bg: #140f1c;
+    --bg-lift: #1c1528;
+    --panel: #211a2e;
+    --line: #322544;
+    --ink: #e8e2f0;
+    --ink-dim: #a89ab8;
+    --ink-faint: #6d6180;
+    --accent: #b98ad6;
+    --accent-deep: #7a4fa3;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px; }
+
+  /* Hero */
+  header {
+    text-align: center;
+    padding: 72px 24px 56px;
+    background: linear-gradient(180deg, #1a1424 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  header img.logo { width: min(560px, 88vw); height: auto; display: block; margin: 0 auto; }
+  header p.tag {
+    margin: 26px auto 6px;
+    font-size: 19px;
+    color: var(--ink);
+    max-width: 34ch;
+  }
+  header p.meta { margin: 0; color: var(--ink-faint); font-size: 14px; }
+
+  .buttons { margin-top: 30px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: 11px 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    background: var(--panel);
+    transition: border-color .15s, background .15s;
+  }
+  .btn:hover { border-color: var(--accent-deep); background: var(--bg-lift); }
+  .btn.primary { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
+  .btn.primary:hover { background: #8d5cbb; border-color: #8d5cbb; }
+
+  /* Sections */
+  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: 0; }
+  h2 { font-size: 22px; margin: 0 0 8px; letter-spacing: -.01em; }
+  h2 + p.lede { margin: 0 0 28px; color: var(--ink-dim); }
+  h3 { font-size: 16px; margin: 0 0 6px; color: var(--accent); }
+
+  figure { margin: 0; }
+  figure img {
+    width: 100%; height: auto; display: block;
+    border: 1px solid var(--line); border-radius: 8px; background: #000;
+  }
+  figcaption { margin-top: 10px; color: var(--ink-faint); font-size: 14px; text-align: center; }
+
+  .grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; }
+  .card p { margin: 0; color: var(--ink-dim); font-size: 15px; }
+
+  .shots { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 28px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { color: var(--ink-faint); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  td:first-child { color: var(--accent); white-space: nowrap; }
+
+  ol { padding-left: 20px; color: var(--ink-dim); }
+  ol li { margin-bottom: 10px; }
+  ol li strong { color: var(--ink); }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13.5px;
+    background: var(--bg-lift);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  pre {
+    background: var(--bg-lift); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; margin: 0;
+  }
+  pre code { background: none; border: 0; padding: 0; }
+
+  .note {
+    background: var(--panel); border: 1px solid var(--line);
+    border-left: 3px solid var(--accent-deep);
+    border-radius: 6px; padding: 16px 18px; color: var(--ink-dim); font-size: 15px;
+  }
+  .note strong { color: var(--ink); }
+
+  a { color: var(--accent); }
+
+  footer {
+    padding: 40px 24px 60px; text-align: center;
+    color: var(--ink-faint); font-size: 14px;
+    border-top: 1px solid var(--line);
+  }
+  footer a { color: var(--ink-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <img class="logo" src="brand/logo.png" alt="Reach-In">
+  <p class="tag">Hover a shulker box. Reach into it. Never place it down again.</p>
+  <p class="meta">Minecraft 1.21.1 · NeoForge 21.1.x</p>
+  <div class="buttons">
+    <a class="btn primary" href="https://github.com/jimbobjunior1234567891011-crypto/Reach-In">View on GitHub</a>
+    <a class="btn" href="#install">Install</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2>See it work</h2>
+    <p class="lede">Hover the box, drag straight into the grid, shift-click straight back out. The box never leaves the inventory.</p>
+    <figure>
+      <img src="brand/demo.gif" alt="Hovering a shulker box opens a grid; diamonds are dragged in and shift-clicked back out">
+      <figcaption>Recorded in game, not a mockup.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>What it does</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Every click behaves</h3>
+        <p>Left-click, right-click, shift-click, drag-distribute, double-click-collect and hotbar swap all work — because the grid's cells are real inventory slots, not a custom widget.</p>
+      </div>
+      <div class="card">
+        <h3>Sticky, not fragile</h3>
+        <p>The panel stays put while you move toward it and never closes while you're carrying an item. Escape closes the grid without closing the screen.</p>
+      </div>
+      <div class="card">
+        <h3>Coloured to match</h3>
+        <p>The panel takes the dye colour of the box you're looking into, so a wall of shulkers stays legible at a glance.</p>
+      </div>
+    </div>
+    <div class="shots">
+      <figure>
+        <img src="brand/shot-chest.png" alt="The grid open beside a chest screen">
+        <figcaption>Works in chests, barrels and every other container screen.</figcaption>
+      </figure>
+      <figure>
+        <img src="brand/shot-tint.png" alt="A lime shulker box showing a green-tinted panel">
+        <figcaption>A lime box, tinted to match.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why it needs the server</h2>
+    <p class="lede">The honest version, because it affects how you install it.</p>
+    <div class="note">
+      <p style="margin:0">Vanilla Minecraft has <strong>no packet</strong> for moving an item inside a shulker box that is itself sitting in an inventory. A client-only mod can <em>show</em> you the contents, but any move it makes is a lie the next server sync erases.</p>
+      <p style="margin:12px 0 0">So Reach-In ships on both sides and is <strong>required on both</strong>. Every move is applied and validated by the server.</p>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install</h2>
+    <p class="lede">Drop the jar in the mods folder — on the client <em>and</em> the server.</p>
+    <ol>
+      <li>Install <a href="https://neoforged.net/">NeoForge 21.1.x</a> for Minecraft 1.21.1.</li>
+      <li>Put <code>reachin-0.1.0.jar</code> in your <strong>client's</strong> <code>mods</code> folder.</li>
+      <li>Put the same jar in your <strong>server's</strong> <code>mods</code> folder. A client-only install won't connect; a server-only install does nothing.</li>
+      <li>Launch. Open your inventory and hover a shulker box.</li>
+    </ol>
+
+    <h2 style="margin-top:36px">Requirements</h2>
+    <table>
+      <tr><th>Item</th><th>Version</th></tr>
+      <tr><td>Minecraft</td><td>1.21.1</td></tr>
+      <tr><td>Loader</td><td>NeoForge 21.1.x</td></tr>
+      <tr><td>Sides</td><td>Client and server, both required</td></tr>
+      <tr><td>Java</td><td>21</td></tr>
+    </table>
+
+    <h2 style="margin-top:36px">Build from source</h2>
+    <p class="lede">No Gradle. NeoForge 21.1 runs on Mojang mappings, so <code>javac</code> and <code>jar</code> are the whole toolchain.</p>
+    <pre><code>git clone https://github.com/jimbobjunior1234567891011-crypto/Reach-In
+cd Reach-In
+.\build.ps1</code></pre>
+  </section>
+
+  <section>
+    <h2>Compatibility</h2>
+    <p class="lede">
+      While the grid is open, the shulker's own tooltip is suppressed so it doesn't cover the panel. That
+      also hides <a href="https://modrinth.com/mod/shulkerboxtooltip">Shulker Box Tooltip</a>'s preview,
+      which renders through the same pipeline, so the two never stack. Keep it installed or don't — either works.
+    </p>
+  </section>
+
+</div>
+
+<footer>
+  MIT licensed · <a href="https://github.com/jimbobjunior1234567891011-crypto/Reach-In">Source on GitHub</a>
+</footer>
+
+</body>
+</html>
