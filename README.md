@@ -1,8 +1,14 @@
-# Shulker Tooltips: Reach-In
+<p align="center">
+  <img src="docs/brand/logo.png" alt="Reach-In" width="620">
+</p>
 
-Hover a shulker box. Reach into it. Never place it down again.
+<p align="center">
+  <b>Hover a shulker box. Reach into it. Never place it down again.</b>
+</p>
 
-Minecraft 1.21.1 · NeoForge 21.1.x · required on client and server
+<p align="center">
+  Minecraft 1.21.1 · NeoForge 21.1.x · required on client and server
+</p>
 
 ---
 
