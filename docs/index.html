@@ -10,224 +10,322 @@
 <meta property="og:description" content="Hover a shulker box. Reach into it. Never place it down again.">
 <meta property="og:image" content="brand/social-preview.png">
 <meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #140f1c;
-    --bg-lift: #1c1528;
-    --panel: #211a2e;
-    --line: #322544;
-    --ink: #e8e2f0;
-    --ink-dim: #a89ab8;
-    --ink-faint: #6d6180;
-    --accent: #b98ad6;
-    --accent-deep: #7a4fa3;
+    --void:      #0d0a14;
+    --void-2:    #150f1f;
+    --purpur:    #a879b0;
+    --purpur-dp: #6d4276;
+    --endstone:  #dbdaa0;
+    --rod:       #e9e4d8;
+    --ink:       #ece7f2;
+    --ink-dim:   #9d90ac;
+    --ink-faint: #665a75;
+    --edge:      #2c2038;
   }
 
   * { box-sizing: border-box; }
 
+  html { scroll-behavior: smooth; }
+
   body {
     margin: 0;
-    background: var(--bg);
+    background: var(--void);
     color: var(--ink);
-    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
-  .wrap { max-width: 840px; margin: 0 auto; padding: 0 24px; }
+  .px { font-family: "Silkscreen", ui-monospace, monospace; font-weight: 700; letter-spacing: .02em; }
 
-  /* Hero */
-  header {
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+  img { image-rendering: pixelated; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    min-height: 78vh;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
     text-align: center;
-    padding: 72px 24px 56px;
-    background: linear-gradient(180deg, #1a1424 0%, var(--bg) 100%);
-    border-bottom: 1px solid var(--line);
+    padding: 90px 24px 70px;
+    overflow: hidden;
   }
-  header img.logo { width: min(560px, 88vw); height: auto; display: block; margin: 0 auto; }
-  header p.tag {
-    margin: 26px auto 6px;
-    font-size: 19px;
-    color: var(--ink);
-    max-width: 46ch;
-    text-wrap: balance;
+  .hero::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("brand/end-hero.jpg") center 62% / cover no-repeat;
+    /* The shot is already dark up top; this just deepens it so the logo can sit on it. */
+    filter: saturate(.85);
   }
-  header p.meta { margin: 0; color: var(--ink-faint); font-size: 14px; }
+  .hero::after {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(13,10,20,.90) 0%, rgba(13,10,20,.52) 42%, rgba(13,10,20,.86) 88%, var(--void) 100%);
+  }
+  .hero > * { position: relative; z-index: 1; }
 
-  .buttons { margin-top: 30px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .hero img.logo { width: min(600px, 90vw); height: auto; display: block; }
+  .hero .tag {
+    margin: 30px auto 10px;
+    font-size: 20px; line-height: 1.5;
+    max-width: 30ch;
+    text-wrap: balance;
+    text-shadow: 0 2px 0 rgba(0,0,0,.75);
+  }
+  .hero .meta {
+    margin: 0; font-size: 12px; color: var(--purpur);
+    text-shadow: 0 2px 0 rgba(0,0,0,.8);
+  }
+
+  .buttons { margin-top: 34px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+  /* Blocky, bevelled, no rounded corners - closer to a game button than a web button. */
   .btn {
     display: inline-block;
-    padding: 11px 22px;
-    border-radius: 6px;
+    padding: 13px 26px;
+    font-family: "Silkscreen", monospace; font-weight: 700; font-size: 13px;
     text-decoration: none;
-    font-size: 15px;
-    font-weight: 600;
-    border: 1px solid var(--line);
     color: var(--ink);
-    background: var(--panel);
-    transition: border-color .15s, background .15s;
+    background: #241a30;
+    border: 0;
+    box-shadow:
+      inset 2px 2px 0 rgba(255,255,255,.14),
+      inset -2px -2px 0 rgba(0,0,0,.55),
+      0 0 0 2px #0d0a14;
+    transition: background .12s, transform .08s;
   }
-  .btn:hover { border-color: var(--accent-deep); background: var(--bg-lift); }
-  .btn.primary { background: var(--accent-deep); border-color: var(--accent-deep); color: #fff; }
-  .btn.primary:hover { background: #8d5cbb; border-color: #8d5cbb; }
+  .btn:hover { background: #2f2240; }
+  .btn:active { transform: translateY(2px); }
+  .btn.primary { background: var(--purpur-dp); color: #fff; }
+  .btn.primary:hover { background: #7f4d8b; }
 
-  /* Sections */
-  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
-  section:last-of-type { border-bottom: 0; }
-  h2 { font-size: 22px; margin: 0 0 8px; letter-spacing: -.01em; }
-  h2 + p.lede { margin: 0 0 28px; color: var(--ink-dim); }
-  h3 { font-size: 16px; margin: 0 0 6px; color: var(--accent); }
+  /* ---------- Sections ---------- */
+  section { padding: 80px 0; }
+  .band { background: var(--void-2); border-top: 2px solid var(--edge); border-bottom: 2px solid var(--edge); }
+
+  h2.px { font-size: 20px; margin: 0 0 10px; color: var(--ink); }
+  .lede { margin: 0 0 34px; color: var(--ink-dim); max-width: 62ch; }
 
   figure { margin: 0; }
-  figure img {
-    width: 100%; height: auto; display: block;
-    border: 1px solid var(--line); border-radius: 8px; background: #000;
+  figure img { width: 100%; height: auto; display: block; border: 2px solid var(--edge); background: #000; }
+  figcaption { margin-top: 12px; color: var(--ink-faint); font-size: 13px; }
+
+  /* ---------- Alternating feature rows ---------- */
+  .row {
+    display: grid; gap: 34px; align-items: center;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 56px;
   }
-  figcaption { margin-top: 10px; color: var(--ink-faint); font-size: 14px; text-align: center; }
+  .row:last-child { margin-bottom: 0; }
+  .row.flip .copy { order: 2; }
+  .row h3 { font-size: 17px; margin: 0 0 10px; color: var(--purpur); }
+  .row p { margin: 0; color: var(--ink-dim); }
 
-  .grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; }
-  .card p { margin: 0; color: var(--ink-dim); font-size: 15px; }
+  @media (max-width: 720px) {
+    .row { grid-template-columns: 1fr; }
+    .row.flip .copy { order: 0; }
+  }
 
-  .shots { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 28px; }
+  /* ---------- Click list ---------- */
+  .clicks { list-style: none; padding: 0; margin: 34px 0 0; display: grid; gap: 2px; }
+  .clicks li {
+    display: grid; grid-template-columns: 190px 1fr; gap: 16px;
+    padding: 12px 16px;
+    background: #191223;
+    border-left: 2px solid var(--edge);
+    color: var(--ink-dim); font-size: 15px;
+  }
+  .clicks li:hover { border-left-color: var(--purpur-dp); background: #1e1629; }
+  .clicks b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 620px) { .clicks li { grid-template-columns: 1fr; gap: 2px; } }
 
-  table { width: 100%; border-collapse: collapse; font-size: 15px; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-  th { color: var(--ink-faint); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
-  td:first-child { color: var(--accent); white-space: nowrap; }
+  /* ---------- Server statement ---------- */
+  .statement { position: relative; padding: 96px 0; overflow: hidden; text-align: center; }
+  .statement::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: url("brand/end-wide.jpg") center 55% / cover no-repeat;
+    opacity: .30;
+  }
+  .statement::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, var(--void) 0%, rgba(13,10,20,.62) 50%, var(--void) 100%);
+  }
+  .statement > * { position: relative; z-index: 1; }
+  .statement .big {
+    font-size: clamp(22px, 3.4vw, 31px); line-height: 1.42;
+    max-width: 20ch; margin: 0 auto; text-wrap: balance;
+    text-shadow: 0 2px 0 rgba(0,0,0,.8);
+  }
+  .statement .big em { font-style: normal; color: var(--purpur); }
+  .statement .after { margin: 26px auto 0; max-width: 54ch; color: var(--ink-dim); font-size: 16px; }
 
-  ol { padding-left: 20px; color: var(--ink-dim); }
-  ol li { margin-bottom: 10px; }
-  ol li strong { color: var(--ink); }
+  /* ---------- Install ---------- */
+  .steps { list-style: none; counter-reset: s; padding: 0; margin: 0; }
+  .steps li {
+    counter-increment: s;
+    display: grid; grid-template-columns: 44px 1fr; gap: 18px; align-items: start;
+    padding: 16px 0; border-bottom: 2px solid var(--edge);
+    color: var(--ink-dim);
+  }
+  .steps li:last-child { border-bottom: 0; }
+  .steps li::before {
+    content: counter(s);
+    font-family: "Silkscreen", monospace; font-weight: 700; font-size: 15px;
+    color: #fff; background: var(--purpur-dp);
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,.16), inset -2px -2px 0 rgba(0,0,0,.45);
+  }
+  .steps strong { color: var(--ink); }
+
+  .spec { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 8px; }
+  .spec td { padding: 12px 14px; border-bottom: 2px solid var(--edge); color: var(--ink); }
+  .spec td:first-child {
+    width: 34%; color: var(--ink-faint);
+    font-family: "Silkscreen", monospace; font-size: 11px; letter-spacing: .04em;
+  }
 
   code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 13.5px;
-    background: var(--bg-lift);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    padding: 1px 6px;
+    font-size: 13.5px; background: #191223; border: 1px solid var(--edge); padding: 1px 6px;
   }
-  pre {
-    background: var(--bg-lift); border: 1px solid var(--line); border-radius: 8px;
-    padding: 14px 16px; overflow-x: auto; margin: 0;
-  }
-  pre code { background: none; border: 0; padding: 0; }
+  pre { background: #100c18; border: 2px solid var(--edge); padding: 16px 18px; overflow-x: auto; margin: 0; }
+  pre code { background: none; border: 0; padding: 0; color: var(--ink-dim); }
+  pre code .c { color: var(--ink-faint); }
 
-  .note {
-    background: var(--panel); border: 1px solid var(--line);
-    border-left: 3px solid var(--accent-deep);
-    border-radius: 6px; padding: 16px 18px; color: var(--ink-dim); font-size: 15px;
-  }
-  .note strong { color: var(--ink); }
+  a { color: var(--purpur); }
+  a:hover { color: #c99ed1; }
 
-  a { color: var(--accent); }
-
-  footer {
-    padding: 40px 24px 60px; text-align: center;
-    color: var(--ink-faint); font-size: 14px;
-    border-top: 1px solid var(--line);
-  }
-  footer a { color: var(--ink-dim); }
+  /* ---------- Footer ---------- */
+  footer { border-top: 2px solid var(--edge); }
+  .footer-band { height: 150px; background: url("brand/end-wide.jpg") center 60% / cover no-repeat; opacity: .5; }
+  .footer-text { padding: 30px 24px 54px; text-align: center; color: var(--ink-faint); font-size: 13px; }
+  .footer-text a { color: var(--ink-dim); }
 </style>
 </head>
 <body>
 
-<header>
+<div class="hero">
   <img class="logo" src="brand/logo.png" alt="Reach-In">
   <p class="tag">Hover a shulker box. Reach into it. Never place it down again.</p>
-  <p class="meta">Minecraft 1.21.1 · NeoForge 21.1.x</p>
+  <p class="meta px">MINECRAFT 1.21.1 &nbsp;·&nbsp; NEOFORGE</p>
   <div class="buttons">
-    <a class="btn primary" href="https://github.com/jimbobjunior1234567891011-crypto/Reach-In">View on GitHub</a>
-    <a class="btn" href="#install">Install</a>
+    <a class="btn primary" href="https://github.com/jimbobjunior1234567891011-crypto/Reach-In">GET IT ON GITHUB</a>
+    <a class="btn" href="#install">INSTALL</a>
   </div>
-</header>
-
-<div class="wrap">
-
-  <section>
-    <h2>See it work</h2>
-    <p class="lede">Hover the box, drag straight into the grid, shift-click straight back out. The box never leaves the inventory.</p>
-    <figure>
-      <img src="brand/demo.gif" alt="Hovering a shulker box opens a grid; diamonds are dragged in and shift-clicked back out">
-      <figcaption>Recorded in game, not a mockup.</figcaption>
-    </figure>
-  </section>
-
-  <section>
-    <h2>What it does</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Every click behaves</h3>
-        <p>Left-click, right-click, shift-click, drag-distribute, double-click-collect and hotbar swap all work — because the grid's cells are real inventory slots, not a custom widget.</p>
-      </div>
-      <div class="card">
-        <h3>Sticky, not fragile</h3>
-        <p>The panel stays put while you move toward it and never closes while you're carrying an item. Escape closes the grid without closing the screen.</p>
-      </div>
-      <div class="card">
-        <h3>Coloured to match</h3>
-        <p>The panel takes the dye colour of the box you're looking into, so a wall of shulkers stays legible at a glance.</p>
-      </div>
-    </div>
-    <div class="shots">
-      <figure>
-        <img src="brand/shot-chest.png" alt="The grid open beside a chest screen">
-        <figcaption>Works in chests, barrels and every other container screen.</figcaption>
-      </figure>
-      <figure>
-        <img src="brand/shot-tint.png" alt="A lime shulker box showing a green-tinted panel">
-        <figcaption>A lime box, tinted to match.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section>
-    <h2>Why it needs the server</h2>
-    <p class="lede">The honest version, because it affects how you install it.</p>
-    <div class="note">
-      <p style="margin:0">Vanilla Minecraft has <strong>no packet</strong> for moving an item inside a shulker box that is itself sitting in an inventory. A client-only mod can <em>show</em> you the contents, but any move it makes is a lie the next server sync erases.</p>
-      <p style="margin:12px 0 0">So Reach-In ships on both sides and is <strong>required on both</strong>. Every move is applied and validated by the server.</p>
-    </div>
-  </section>
-
-  <section id="install">
-    <h2>Install</h2>
-    <p class="lede">Drop the jar in the mods folder — on the client <em>and</em> the server.</p>
-    <ol>
-      <li>Install <a href="https://neoforged.net/">NeoForge 21.1.x</a> for Minecraft 1.21.1.</li>
-      <li>Put <code>reachin-0.1.0.jar</code> in your <strong>client's</strong> <code>mods</code> folder.</li>
-      <li>Put the same jar in your <strong>server's</strong> <code>mods</code> folder. A client-only install won't connect; a server-only install does nothing.</li>
-      <li>Launch. Open your inventory and hover a shulker box.</li>
-    </ol>
-
-    <h2 style="margin-top:36px">Requirements</h2>
-    <table>
-      <tr><th>Item</th><th>Version</th></tr>
-      <tr><td>Minecraft</td><td>1.21.1</td></tr>
-      <tr><td>Loader</td><td>NeoForge 21.1.x</td></tr>
-      <tr><td>Sides</td><td>Client and server, both required</td></tr>
-      <tr><td>Java</td><td>21</td></tr>
-    </table>
-
-    <h2 style="margin-top:36px">Build from source</h2>
-    <p class="lede">No Gradle. NeoForge 21.1 runs on Mojang mappings, so <code>javac</code> and <code>jar</code> are the whole toolchain.</p>
-    <pre><code>git clone https://github.com/jimbobjunior1234567891011-crypto/Reach-In
-cd Reach-In
-.\build.ps1</code></pre>
-  </section>
-
-  <section>
-    <h2>Compatibility</h2>
-    <p class="lede">
-      While the grid is open, the shulker's own tooltip is suppressed so it doesn't cover the panel. That
-      also hides <a href="https://modrinth.com/mod/shulkerboxtooltip">Shulker Box Tooltip</a>'s preview,
-      which renders through the same pipeline, so the two never stack. Keep it installed or don't — either works.
-    </p>
-  </section>
-
 </div>
 
+<section class="band">
+  <div class="wrap">
+    <h2 class="px">SEE IT WORK</h2>
+    <p class="lede">Hover the box, drag straight into the grid, shift-click straight back out. The box never leaves your inventory.</p>
+    <figure>
+      <img src="brand/demo.gif" alt="Hovering a shulker box opens a grid; diamonds are dragged in and shift-clicked back out">
+      <figcaption>Recorded in game. Not a mockup.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="px">EVERYWHERE YOU'D WANT IT</h2>
+    <p class="lede">Your inventory, chests, barrels, ender chests — anywhere a container screen opens.</p>
+
+    <div class="row">
+      <div class="copy">
+        <h3>Sorting a chest stops being a chore</h3>
+        <p>Open a chest with a shulker in your bag and both are live at once. Pull from one, drop into the other, no
+           placing the box down and breaking it again afterwards.</p>
+      </div>
+      <figure>
+        <img src="brand/shot-chest.png" alt="The grid open beside a chest screen">
+      </figure>
+    </div>
+
+    <div class="row flip">
+      <div class="copy">
+        <h3>Coloured to match the box</h3>
+        <p>The panel takes the dye colour of the shulker you're looking into, so a wall of them stays legible at a
+           glance. Undyed boxes get their own purple.</p>
+      </div>
+      <figure>
+        <img src="brand/shot-tint.png" alt="A lime shulker box showing a green-tinted panel">
+      </figure>
+    </div>
+
+    <ul class="clicks">
+      <li><b>Left &amp; right click</b><span>Pick up, place, split a stack in half — exactly as anywhere else.</span></li>
+      <li><b>Shift-click</b><span>Straight into the box from your inventory, straight back out to your hotbar.</span></li>
+      <li><b>Drag to distribute</b><span>Spread a stack across several cells in one motion.</span></li>
+      <li><b>Double-click collect</b><span>Gather every matching item, including the ones inside the box.</span></li>
+      <li><b>Number keys</b><span>Swap a cell straight to a hotbar slot.</span></li>
+    </ul>
+    <p class="lede" style="margin-top:24px">
+      None of that is reimplemented. The grid's cells are real inventory slots, so the game's own click handling
+      runs on them unchanged — which is why they behave.
+    </p>
+  </div>
+</section>
+
+<div class="statement">
+  <div class="wrap">
+    <p class="big">Vanilla has <em>no packet</em> for moving an item inside a shulker box you're carrying.</p>
+    <p class="after">A client-only mod can show you the contents, but any move it makes is a lie the next server
+      sync erases. So Reach-In ships on both sides and is required on both — every move is applied and validated
+      by the server.</p>
+  </div>
+</div>
+
+<section class="band" id="install">
+  <div class="wrap">
+    <h2 class="px">INSTALL</h2>
+    <p class="lede">Drop the jar in the mods folder — on the client <em>and</em> the server.</p>
+    <ol class="steps">
+      <li><span>Install <a href="https://neoforged.net/">NeoForge 21.1.x</a> for Minecraft 1.21.1.</span></li>
+      <li><span>Put <code>reachin-0.1.0.jar</code> in your <strong>client's</strong> <code>mods</code> folder.</span></li>
+      <li><span>Put the same jar in your <strong>server's</strong> <code>mods</code> folder. Client-only won't connect; server-only does nothing.</span></li>
+      <li><span>Launch, open your inventory, hover a shulker box.</span></li>
+    </ol>
+
+    <h2 class="px" style="margin-top:60px">REQUIREMENTS</h2>
+    <table class="spec">
+      <tr><td>MINECRAFT</td><td>1.21.1</td></tr>
+      <tr><td>LOADER</td><td>NeoForge 21.1.x</td></tr>
+      <tr><td>SIDES</td><td>Client and server — both required</td></tr>
+      <tr><td>JAVA</td><td>21</td></tr>
+    </table>
+
+    <h2 class="px" style="margin-top:60px">BUILD IT YOURSELF</h2>
+    <p class="lede">No Gradle. NeoForge 21.1 runs on Mojang mappings, so <code>javac</code> and <code>jar</code> are the whole toolchain.</p>
+<pre><code>git clone https://github.com/jimbobjunior1234567891011-crypto/Reach-In
+cd Reach-In
+.\build.ps1</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 class="px">PLAYS NICE WITH SHULKER BOX TOOLTIP</h2>
+    <p class="lede" style="margin-bottom:0">
+      While the grid is open, the shulker's own tooltip is suppressed so it can't cover the panel. That also hides
+      <a href="https://modrinth.com/mod/shulkerboxtooltip">Shulker Box Tooltip</a>'s preview, which draws through
+      the same pipeline — so the two never stack on top of each other. Keep it installed or don't. Either works.
+    </p>
+  </div>
+</section>
+
 <footer>
-  MIT licensed · <a href="https://github.com/jimbobjunior1234567891011-crypto/Reach-In">Source on GitHub</a>
+  <div class="footer-band"></div>
+  <div class="footer-text">
+    MIT licensed · <a href="https://github.com/jimbobjunior1234567891011-crypto/Reach-In">Source on GitHub</a>
+  </div>
 </footer>
 
 </body>
