@@ -48,7 +48,9 @@
   /* ---------- Hero ---------- */
   .hero {
     position: relative;
-    min-height: 78vh;
+    /* Clamped rather than pure vh: on a tall window an unbounded hero pushes
+       everything below the fold and blows the background image up. */
+    min-height: clamp(520px, 76vh, 760px);
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     text-align: center;
     padding: 90px 24px 70px;
@@ -58,14 +60,16 @@
     content: "";
     position: absolute; inset: 0;
     background: url("brand/end-hero.jpg") center 62% / cover no-repeat;
-    /* The shot is already dark up top; this just deepens it so the logo can sit on it. */
-    filter: saturate(.85);
+    /* The End is dim in game; lift it enough that the dyed boxes read as colours. */
+    filter: saturate(1.08) brightness(1.14);
   }
   .hero::after {
     content: "";
     position: absolute; inset: 0;
+    /* Dark at the top so the logo sits cleanly, open through the middle so the
+       platform stays visible, closing to the page colour at the bottom. */
     background:
-      linear-gradient(180deg, rgba(13,10,20,.90) 0%, rgba(13,10,20,.52) 42%, rgba(13,10,20,.86) 88%, var(--void) 100%);
+      linear-gradient(180deg, rgba(13,10,20,.90) 0%, rgba(13,10,20,.44) 42%, rgba(13,10,20,.86) 88%, var(--void) 100%);
   }
   .hero > * { position: relative; z-index: 1; }
 
@@ -145,7 +149,7 @@
   @media (max-width: 620px) { .clicks li { grid-template-columns: 1fr; gap: 2px; } }
 
   /* ---------- Server statement ---------- */
-  .statement { position: relative; padding: 96px 0; overflow: hidden; text-align: center; }
+  .statement { position: relative; padding: 74px 0; overflow: hidden; text-align: center; }
   .statement::before {
     content: "";
     position: absolute; inset: 0;
@@ -160,7 +164,7 @@
   .statement > * { position: relative; z-index: 1; }
   .statement .big {
     font-size: clamp(22px, 3.4vw, 31px); line-height: 1.42;
-    max-width: 20ch; margin: 0 auto; text-wrap: balance;
+    max-width: 26ch; margin: 0 auto; text-wrap: balance;
     text-shadow: 0 2px 0 rgba(0,0,0,.8);
   }
   .statement .big em { font-style: normal; color: var(--purpur); }
